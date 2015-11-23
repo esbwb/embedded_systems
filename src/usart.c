@@ -17,6 +17,11 @@ static int usart_putc_stdio(char c, FILE * UNUSED(file))
 	usart_putc(c);
 	return 0;
 }
+
+/* Set up a stdio stream which reads from/writes to usart */
+static FILE fusart = FDEV_SETUP_STREAM(usart_putc_stdio,
+                                        usart_getc_stdio,
+                                        _FDEV_SETUP_RW);
 #endif
 
 void usart_init()
@@ -39,9 +44,10 @@ void usart_init()
         UCSR0C = (1<<UCSZ01) | (1<<UCSZ00);
 
 	#ifdef WITH_STDIO
-	/* This opens stdout/stderr for writing to usart
-	   and stdin for reading from usart */
-	fdevopen(usart_putc_stdio, usart_getc_stdio);
+	/* Redirect standart streams to fusart so e.g. printf 
+         * writes to usart */
+        stdin = &fusart;
+        stdout = stderr = &fusart;
 	#endif
 }
 

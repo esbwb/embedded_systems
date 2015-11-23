@@ -5,9 +5,9 @@ OBJS :=
 DEPS :=
 
 CFLAGS = \
--Wall -Wextra -g2 -gstabs -O2 -fpack-struct -fshort-enums -ffunction-sections \
--fdata-sections -std=gnu99 -funsigned-char -funsigned-bitfields -mmcu=$(MCU) \
--DF_CPU=$(FREQ)UL
+-Wall -Wextra -g2 -gstabs -O2 -fpack-struct -fshort-enums \
+-ffunction-sections -fdata-sections -std=gnu99 -funsigned-char \
+-funsigned-bitfields -mmcu=$(MCU) -DF_CPU=$(FREQ)UL
 
 LFLAGS = -Wl,-Map,$(MAP)
 
