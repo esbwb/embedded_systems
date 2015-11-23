@@ -7,4 +7,6 @@
 #define STRING_MSG2(x) #x
 #define STRING_MSG(x) STRING_MSG2(x)
 
+#define UNUSED(x) x __attribute__((unused))
+
 #endif

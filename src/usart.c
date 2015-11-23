@@ -1,20 +1,48 @@
 #include <avr/io.h>
 
+#define BAUD 9600
+#include <util/setbaud.h>
+
 #include "usart.h"
 #include "macros.h"
 
-void usart_init(const unsigned int ubrr)
+#ifdef WITH_STDIO
+static int usart_getc_stdio(FILE * UNUSED(file))
+{
+	return usart_getc();
+}
+
+static int usart_putc_stdio(char c, FILE * UNUSED(file))
+{
+	usart_putc(c);
+	return 0;
+}
+#endif
+
+void usart_init()
 {
         /* Write high byte of baud rate to ubrr */
-        UBRR0H = (unsigned char)(ubrr>>8);
+        UBRR0H = UBRRH_VALUE;
         /* Write low byte of baud rate to ubrr */
-        UBRR0L = (unsigned char) ubrr;
+        UBRR0L = UBRRL_VALUE;
+
+	#if USE_2X
+	UCSR0A |= (1<<U2X0);
+	#else
+	UCSR0A &= ~(1<<U2X0);
+	#endif
 
         /* Enable receiver and transmitter */
         UCSR0B = (1<<RXEN0) | (1<<TXEN0);
 
         /* Set frame format to 8n1 */
         UCSR0C = (1<<UCSZ01) | (1<<UCSZ00);
+
+	#ifdef WITH_STDIO
+	/* This opens stdout/stderr for writing to usart
+	   and stdin for reading from usart */
+	fdevopen(usart_putc_stdio, usart_getc_stdio);
+	#endif
 }
 
 char usart_getc()

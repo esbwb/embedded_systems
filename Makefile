@@ -4,6 +4,13 @@ OBJS :=
 
 DEPS :=
 
+CFLAGS = \
+-Wall -Wextra -g2 -gstabs -O2 -fpack-struct -fshort-enums -ffunction-sections \
+-fdata-sections -std=gnu99 -funsigned-char -funsigned-bitfields -mmcu=$(MCU) \
+-DF_CPU=$(FREQ)UL
+
+LFLAGS = -Wl,-Map,$(MAP)
+
 LIBS :=
 
 ELF := es.elf
@@ -30,6 +37,19 @@ SIM_READ := 0x22,
 
 SIM_WRITE := 0x20,
 
+#Determins whether we use avr-libc stdio (for printf)
+WITH_STDIO := 1
+
+ifeq ($(SIM),1)
+CFLAGS += -DSIM
+endif
+
+ifeq ($(WITH_STDIO),1)
+CFLAGS += -DWITH_STDIO
+LFLAGS += -Wl,-u,vfprintf
+LIBS += -lprintf_min
+endif
+
 .DEFAULT_GOAL := all
 
 include src/Makefile
@@ -41,7 +61,7 @@ all: $(ELF) $(LSS) $(HEX) $(EEP)
 $(ELF): $(OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: AVR C Linker'
-	avr-gcc -Wl,-Map,$(MAP) -mmcu=$(MCU) -o $(ELF) $(OBJS) $(LIBS)
+	avr-gcc $(LFLAGS) -mmcu=$(MCU) -o $(ELF) $(OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
